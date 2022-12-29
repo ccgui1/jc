@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.suning.jc.mapper.ClaStuMapper">
+    <select id="searchClsStuByClass" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select
+            student_id,student_nm,college,phone,course_nm
+        from jc.jc_class_student
+        where class_id=#{classId}
+        <if test="studentNm != null and studentNm != ''">
+          and student_nm like '%${studentNm}%'
+        </if>
+        order by create_time asc
+    </select>
+
+    <select id="downloadClsStuByClass" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select
+        a.student_id,a.student_nm,a.college,a.phone,a.course_nm,b.sign_course
+        from jc.jc_class_student a left join jc.jc_student  b on a.student_id=b.student_id
+        where a.class_id=#{classId}
+        order by a.create_time asc
+    </select>
+
+    <select id="searchStudentCountForClass" parameterType="java.util.HashMap" resultType="java.lang.Integer">
+        select
+        count(student_id) as count
+        from jc.jc_student
+        where 1=1
+        <if test="studentNm != null and studentNm != ''">
+            and student_nm like '%${studentNm}%'
+        </if>
+        <if test="college != null and college != ''">
+            and college like '%${college}%'
+        </if>
+    </select>
+
+    <!--学生约课,检索学员时使用 -->
+    <select id="searchStudentForClass" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select a.*,b.class_course,b.class_ids from (
+            select
+                student_id,
+                student_nm,
+                college,
+                phone,
+                sign_course
+            from jc.jc_student a
+            where 1=1
+            <if test="studentNm != null and studentNm != ''">
+                and student_nm like '%${studentNm}%'
+            </if>
+            <if test="college != null and college != ''">
+                and college like '%${college}%'
+            </if>
+            order by create_time desc
+            limit #{startRow},#{pageSize}
+        ) as a left join (
+            SELECT
+                student_id,
+                GROUP_CONCAT(DISTINCT course_nm ORDER BY create_time ASC SEPARATOR ',') as class_course,
+                GROUP_CONCAT(DISTINCT class_id ORDER BY create_time ASC SEPARATOR ',') as class_ids
+            FROM jc.jc_class_student
+            where student_id in(
+                select s.student_id from(
+                    select student_id  from jc.jc_student
+                    where 1=1
+                    <if test="studentNm != null and studentNm != ''">
+                        and student_nm like '%${studentNm}%'
+                    </if>
+                    <if test="college != null and college != ''">
+                        and college like '%${college}%'
+                    </if>
+                    order by create_time desc
+                    limit #{startRow},#{pageSize}
+                ) s
+            )
+            GROUP BY student_id
+        ) b on a.student_id=b.student_id
+    </select>
+
+    <insert id="batchAddStudent" parameterType="java.util.List">
+        INSERT INTO jc.jc_class_student
+        (
+            class_id,
+            student_id,
+            student_nm,
+            college,
+            phone,
+            course_nm,
+            create_user
+        )
+        VALUES
+        <foreach collection ="list" item="item" separator =",">
+            (#{item.classId}, #{item.studentId}, #{item.studentNm},#{item.college}, #{item.phone}, #{item.courseNm},#{item.operator})
+        </foreach >
+    </insert>
+
+</mapper>

@@ -1,0 +1,9 @@
+@charset "UTF-8";
+.redStar::after{
+    content:"*";
+    color:red
+}
+table td{
+    word-wrap:break-word;
+    word-break:break-all;
+}

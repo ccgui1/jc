@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.suning.jc.mapper.StudentMapper">
+
+    <select id="searchStudent" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select
+            student_id,
+            student_nm,
+            college,
+            major_nm,
+            uid,
+            phone,
+            email,
+            qq,
+            adviser,
+            sign_course,
+            sign_time,
+            exam_passed,
+            employment_unit,
+            memo
+        from jc.jc_student a
+        where 1=1
+        <if test="studentNm != null and studentNm != ''">
+            and student_nm like '%${studentNm}%'
+        </if>
+        <if test="college != null and college != ''">
+            and college like '%${college}%'
+        </if>
+        <if test="adviser != null and adviser != ''">
+            and adviser like '%${adviser}%'
+        </if>
+         <if test="uid != null and uid != ''">
+            and uid like '%${uid}%'
+        </if>
+         <if test="phone != null and phone != ''">
+            and phone like '%${phone}%'
+        </if>
+        order by create_time desc
+    </select>
+    <select id="downloadSearchStudent" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select
+        student_id,
+        student_nm,
+        college,
+        major_nm,
+        uid,
+        phone,
+        email,
+        qq,
+        adviser,
+        sign_course,
+        sign_time,
+        exam_passed,
+        employment_unit,
+        memo
+        from jc.jc_student a
+        where 1=1
+        <if test="studentNm != null and studentNm != ''">
+            and student_nm like '%${studentNm}%'
+        </if>
+        <if test="college != null and college != ''">
+            and college like '%${college}%'
+        </if>
+        <if test="adviser != null and adviser != ''">
+            and adviser like '%${adviser}%'
+        </if>
+        <if test="uid != null and uid != ''">
+            and uid like '%${uid}%'
+        </if>
+        <if test="phone != null and phone != ''">
+            and phone like '%${phone}%'
+        </if>
+        order by create_time desc
+        limit 10000
+    </select>
+    <insert id="addStudent">
+        insert into jc.jc_student(
+            student_nm,
+            college,
+            major_nm,
+            uid,
+            phone,
+            email,
+            qq,
+            adviser,
+            sign_course,
+            sign_time,
+            exam_passed,
+            employment_unit,
+            memo,
+            create_user
+        )
+        values(
+            #{studentNm},
+            #{college},
+            #{majorNm},
+            #{uid},
+            #{phone},
+            #{email},
+            #{qq},
+            #{adviser},
+            #{signCourse},
+            #{signTime},
+            #{examPassed},
+            #{employmentUnit},
+            #{memo},
+            #{operator}
+        )
+    </insert>
+    <update id="updateStudent">
+        update jc.jc_student
+        set create_time=now(),create_user=#{operator}
+        <if test="studentNm!= null and studentNm != '' ">
+            ,student_nm=#{studentNm}
+        </if>
+        <if test="college!= null and college != '' ">
+            ,college=#{college}
+        </if>
+        <if test="majorNm!= null and majorNm != '' ">
+            ,major_nm=#{majorNm}
+        </if>
+        <if test="uid!= null and uid != '' ">
+            ,uid=#{uid}
+        </if>
+        <if test="phone!= null and phone != '' ">
+            ,phone=#{phone}
+        </if>
+        <if test="email!= null and email != '' ">
+            ,email=#{email}
+        </if>
+
+        <if test="adviser!= null and adviser != '' ">
+            ,adviser=#{adviser}
+        </if>
+        <if test="signCourse!= null and signCourse != '' ">
+            ,sign_course=#{signCourse}
+        </if>
+        <if test="signTime!= null and signTime != '' ">
+            ,sign_time=#{signTime}
+        </if>
+        <if test="examPassed!= null and examPassed != '' ">
+            ,exam_passed=#{examPassed}
+        </if>
+        <if test="employmentUnit!= null and employmentUnit != '' ">
+            ,employment_unit=#{employmentUnit}
+        </if>
+        <if test="memo!= null and memo != '' ">
+            ,memo=#{memo}
+        </if>
+        where student_id=#{studentId}
+    </update>
+    <select id="getStudentClassList" resultType="java.util.HashMap">
+        select b.course_nm,
+               b.class_type,
+               b.date_range,
+               b.date_detail,
+               b.teacher_nm,
+               b.headmaster,
+               date_format(a.create_time,'%Y-%m-%d %T') as create_time
+        from jc.jc_class_student a
+            join jc.jc_class b on a.class_id=b.class_id
+        where a.student_id=#{studentId}
+        order by a.create_time desc
+        limit 1000
+    </select>
+
+</mapper>

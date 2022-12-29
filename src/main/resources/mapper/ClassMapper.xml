@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.suning.jc.mapper.ClassMapper">
+
+    <select id="searchClass" parameterType="java.util.HashMap" resultType="java.util.HashMap">
+        select
+            class_id,
+            course_nm,
+            class_type,
+            date_range,
+            date_detail,
+            teacher_nm,
+            headmaster,
+            date_format(create_time,'%Y-%m-%d %T') as create_time
+        from jc.jc_class
+        where 1=1
+        <if test="courseNm != null and courseNm != '' and courseNm != '所有课程'">
+          and course_nm =#{courseNm}
+        </if>
+        <if test="teacherNm != null and teacherNm != ''">
+          and teacher_nm like '%${teacherNm}%'
+        </if>
+        <if test="dateDetail != null and dateDetail != ''">
+            and date_detail like '%${dateDetail}%'
+        </if>
+        order by create_time desc
+    </select>
+
+    <insert id="addClass">
+        <![CDATA[
+        insert into jc.jc_class(
+            course_nm,
+            class_type,
+            date_range,
+            date_detail,
+            teacher_nm,
+            headmaster,
+            create_time,
+            create_user
+           )
+        values(#{courseNm},#{classType},#{dateRange},#{dateDetail},#{teacherNm},#{headmaster},now(),#{operator})
+        ]]>
+    </insert>
+
+    <update id="updateClass">
+        update jc.jc_class
+        set create_time=now(),create_user=#{operator}
+        <if test="courseNm!= null and courseNm != '' ">
+            ,course_nm=#{courseNm}
+        </if>
+        <if test="classType!= null and classType != '' ">
+            ,class_type=#{classType}
+        </if>
+        <if test="dateRange!= null and dateRange != '' ">
+            ,date_range=#{dateRange}
+        </if>
+        <if test="dateDetail!= null and dateDetail != '' ">
+            ,date_detail=#{dateDetail}
+        </if>
+        <if test="teacherNm!= null and teacherNm != '' ">
+            ,teacher_nm=#{teacherNm}
+        </if>
+        <if test="headmaster!= null and headmaster != '' ">
+            ,headmaster=#{headmaster}
+        </if>
+        where class_id=#{classId}
+    </update>
+
+</mapper>
